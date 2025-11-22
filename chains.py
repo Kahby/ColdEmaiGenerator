@@ -4,32 +4,14 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.exceptions import OutputParserException
 from dotenv import load_dotenv
-import re
 
 load_dotenv()
 
 class Chain:
     def __init__(self):
-        self.llm = ChatGroq(temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"), model_name="qwen/qwen3-32b")
+        self.llm = ChatGroq(temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"), model_name="openai/gpt-oss-120b")
 
-    def clean_text(text):
-        # 1. Remove HTML tags (if using a raw loader)
-        text = re.sub(r'<[^>]*?>', '', text)
-        
-        # 2. Remove URLS, special characters, and excessive whitespace
-        text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
-        text = re.sub(r'\s+', ' ', text).strip() # Replace multiple spaces/newlines with single space
-        
-        # 3. TRUNCATE THE TEXT (The most important fix)
-        # Most job descriptions don't need more than 3000-5000 characters to understand.
-        # If the text is huge, we chop off the rest to save the context window.
-        max_length = 6000 
-        if len(text) > max_length:
-            text = text[:max_length]
-            
-        return text
-
-    def extract_jobs(self, clean_text(cleaned_text)):
+    def extract_jobs(self, cleaned_text):
         prompt_extract = PromptTemplate.from_template(
             """
             ### SCRAPED TEXT FROM WEBSITE:
